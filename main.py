@@ -30,8 +30,40 @@ def extract(source):
     return value
 
 
+def send_email():
+    print("Email sent.")
+
+
+def store(extracted, datafile="./data/data.txt"):
+    """
+    This function adds the most recent concert to the datafile.
+    :param extracted:
+    :return:
+    """
+    with open(datafile, "a") as file:
+        file.write(extracted + "\n")
+
+
+def read_data(datafile="./data/data.txt"):
+    """
+    This function reads the lines in the datafile and returns them
+    as a list.
+    :param datafile: str, optional
+    :return: list of str
+    """
+    with open(datafile, "r") as file:
+        content = file.readlines()
+    content = [item.replace("\n", "") for item in content]
+    return content
+
+
 if __name__ == "__main__":
     scraped = scrape(URL)
-    print(scraped)
     extracted = extract(scraped)
     print(extracted)
+    data = read_data()
+    print(data)
+    if extracted != "No upcoming tours":
+        if extracted not in data:
+            send_email()
+            store(extracted)
