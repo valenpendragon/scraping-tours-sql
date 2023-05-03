@@ -18,5 +18,20 @@ def scrape(url):
     return source
 
 
+def extract(source):
+    """
+    Extracts the data belonging to id="displaytime" in the page source text
+    and returns that data.
+    :param source:
+    :return:
+    """
+    extractor = selectorlib.Extractor.from_yaml_file("extract.yaml")
+    value = extractor.extract(source)["tours"]
+    return value
+
+
 if __name__ == "__main__":
-    print(scrape(URL))
+    scraped = scrape(URL)
+    print(scraped)
+    extracted = extract(scraped)
+    print(extracted)
