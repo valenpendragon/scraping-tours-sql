@@ -1,5 +1,8 @@
 import requests
 import selectorlib
+import smtplib
+import os
+import ssl
 
 URL = "http://programmer100.pythonanywhere.com/tours/"
 # Note: Sometimes, we need a header to make it appear that the scraping function
@@ -30,8 +33,19 @@ def extract(source):
     return value
 
 
-def send_email():
-    print("Email sent.")
+def send_email(message):
+    # Creating the email header information.
+    host = "smtp.gmail.com"
+    port = 465
+    username = "valenpendragon@gmail.com"
+    # Get this password before prepping the email.
+    password = os.getenv("PASSWORD")
+    receiver = "valenpendragon@hotmail.com"
+    context = ssl.create_default_context()
+    message = message
+    with smtplib.SMTP_SSL(host, port, context=context) as server:
+        server.login(username, password)
+        server.sendmail(username, receiver, message)
 
 
 def store(extracted, datafile="./data/data.txt"):
@@ -65,5 +79,5 @@ if __name__ == "__main__":
     print(data)
     if extracted != "No upcoming tours":
         if extracted not in data:
-            send_email()
+            send_email(message="New event was found.")
             store(extracted)
