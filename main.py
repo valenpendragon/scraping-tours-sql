@@ -38,19 +38,20 @@ class Event:
         return value
 
 
-def send_email(message):
-    # Creating the email header information.
-    host = "smtp.gmail.com"
-    port = 465
-    username = "valenpendragon@gmail.com"
-    # Get this password before prepping the email.
-    password = os.getenv("PASSWORD")
-    receiver = "valenpendragon@hotmail.com"
-    context = ssl.create_default_context()
-    message = message
-    with smtplib.SMTP_SSL(host, port, context=context) as server:
-        server.login(username, password)
-        server.sendmail(username, receiver, message)
+class Email:
+    def send(self, message):
+        # Creating the email header information.
+        host = "smtp.gmail.com"
+        port = 465
+        username = "valenpendragon@gmail.com"
+        # Get this password before prepping the email.
+        password = os.getenv("PASSWORD")
+        receiver = "valenpendragon@hotmail.com"
+        context = ssl.create_default_context()
+        message = message
+        with smtplib.SMTP_SSL(host, port, context=context) as server:
+            server.login(username, password)
+            server.sendmail(username, receiver, message)
 
 
 def store(extracted):
@@ -101,7 +102,8 @@ if __name__ == "__main__":
         data = read_data(extracted)
         print(data)
         if not data:
-            send_email(message="New event was found.")
+            email = Email()
+            email.send(message="New event was found.")
             print("Email sent.")
             store(extracted)
             print(f"{extracted} written to database.")
