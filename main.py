@@ -15,27 +15,27 @@ DATABASE = Path("G:\\Users\\valen\\Documents\\Valen\\python\\python-mega-course\
 connection = sqlite3.connect(DATABASE)
 
 
-def scrape(url):
-    """
-    Scrape the page source from the URL and return it as a string.
-    :param url: str of a url
-    :return:
-    """
-    response = requests.get(url)
-    source = response.text
-    return source
+class Event:
+    def scrape(self, url):
+        """
+        Scrape the page source from the URL and return it as a string.
+        :param url: str of a url
+        :return:
+        """
+        response = requests.get(url)
+        source = response.text
+        return source
 
-
-def extract(source):
-    """
-    Extracts the data belonging to id="displaytime" in the page source text
-    and returns that data.
-    :param source:
-    :return:
-    """
-    extractor = selectorlib.Extractor.from_yaml_file("extract.yaml")
-    value = extractor.extract(source)["tours"]
-    return value
+    def extract(self, source):
+        """
+        Extracts the data belonging to id="displaytime" in the page source text
+        and returns that data.
+        :param source:
+        :return:
+        """
+        extractor = selectorlib.Extractor.from_yaml_file("extract.yaml")
+        value = extractor.extract(source)["tours"]
+        return value
 
 
 def send_email(message):
@@ -92,8 +92,9 @@ def read_data(extracted):
 
 
 if __name__ == "__main__":
-    scraped = scrape(URL)
-    extracted = extract(scraped)
+    event = Event()
+    scraped = event.scrape(URL)
+    extracted = event.extract(scraped)
     print(extracted)
 
     if extracted != "No upcoming tours":
