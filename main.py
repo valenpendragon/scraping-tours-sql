@@ -12,7 +12,6 @@ URL = "http://programmer100.pythonanywhere.com/tours/"
 # argument, headers. An example header string is stored in the extras directory.
 
 DATABASE = Path("G:\\Users\\valen\\Documents\\Valen\\python\\python-mega-course\\scraping-tours-sql\\data\\data.db")
-connection = sqlite3.connect(DATABASE)
 
 
 class Event:
@@ -54,42 +53,45 @@ class Email:
             server.sendmail(username, receiver, message)
 
 
-def store(extracted):
-    """
-    This function adds the most recent concert tour data to the database.
+class Database:
+    def __init__(self, database_path):
+        self.connection = sqlite3.connect(database_path)
 
-    Before making the database query, it will also clean up parts of the data
-    strings to eliminate trailing and leading blank spaces.
-    :param extracted: str
-    :return:
-    """
-    row = extracted.split(",")
-    row = [item.strip() for item in row]
-    cursor = connection.cursor()
-    cursor.execute("INSERT INTO events VALUES(?,?,?)", row)
-    connection.commit()
+    def store(self, extracted):
+        """
+        This function adds the most recent concert tour data to the database.
 
+        Before making the database query, it will also clean up parts of the data
+        strings to eliminate trailing and leading blank spaces.
+        :param extracted: str
+        :return:
+        """
+        row = extracted.split(",")
+        row = [item.strip() for item in row]
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO events VALUES(?,?,?)", row)
+        self.connection.commit()
 
-def read_data(extracted):
-    """
-    This function reads the lines in the datafile and returns a string of the
-    row, if any, in the database matching the extracted tour. An empty list
-    indicates that there are no matching entries in the database.
+    def read(self, extracted):
+        """
+        This function reads the lines in the datafile and returns a string of the
+        row, if any, in the database matching the extracted tour. An empty list
+        indicates that there are no matching entries in the database.
 
-    Before making the database query, it will also clean up parts of the data
-    strings to eliminate trailing and leading blank spaces.
-    :param database: Path, optional
-    :return: list of tuple or empty list
-    """
-    row = extracted.split(",")
-    row = [item.strip() for item in row]
-    band, city, date = row
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM events WHERE band=? AND city=? AND date=?",
-                   (band, city, date))
-    rows = cursor.fetchall()
-    print(f"rows: {rows}")
-    return rows
+        Before making the database query, it will also clean up parts of the data
+        strings to eliminate trailing and leading blank spaces.
+        :param database: Path, optional
+        :return: list of tuple or empty list
+        """
+        row = extracted.split(",")
+        row = [item.strip() for item in row]
+        band, city, date = row
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM events WHERE band=? AND city=? AND date=?",
+                       (band, city, date))
+        rows = cursor.fetchall()
+        print(f"rows: {rows}")
+        return rows
 
 
 if __name__ == "__main__":
@@ -99,11 +101,12 @@ if __name__ == "__main__":
     print(extracted)
 
     if extracted != "No upcoming tours":
-        data = read_data(extracted)
+        database = Database(database_path=DATABASE)
+        data = database.read(extracted)
         print(data)
         if not data:
             email = Email()
             email.send(message="New event was found.")
             print("Email sent.")
-            store(extracted)
+            database.store(extracted)
             print(f"{extracted} written to database.")
